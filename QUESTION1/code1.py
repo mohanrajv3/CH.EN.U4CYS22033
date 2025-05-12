@@ -2,11 +2,9 @@ import asyncio
 import math
 from datetime import datetime, timedelta
 from typing import List, Dict, Optional
-
 import httpx
 from fastapi import FastAPI, HTTPException, Query
 from pydantic import BaseModel
-
 
 BASE_URL = "http://20.244.56.144/evaluation-service"
 ACCESS_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJNYXBDbGFpbXMiOnsiZXhwIjoxNzQ3MDYwNTYzLCJpYXQiOjE3NDcwNjAyNjMsImlzcyI6IkFmZm9yZG1lZCIsImp0aSI6IjdlMzhjMzUyLTRjZmMtNDY2YS04MjExLTM4MjlkYTRiN2JjMiIsInN1YiI6Im1vaGFucmFqdi5hZ24yMUBnbWFpbC5jb20ifSwiZW1haWwiOiJtb2hhbnJhanYuYWduMjFAZ21haWwuY29tIiwibmFtZSI6Im1vaGFucmFqIHZlbmthdGVzYW4iLCJyb2xsTm8iOiJjaC5lbi51NGN5czIyMDMzIiwiYWNjZXNzQ29kZSI6IlN3dXVLRSIsImNsaWVudElEIjoiN2UzOGMzNTItNGNmYy00NjZhLTgyMTEtMzgyOWRhNGI3YmMyIiwiY2xpZW50U2VjcmV0IjoiQ3FaWEpHeGRmZE1qcFVmdiJ9.xuF_PbVqABjEnnLGx84PHbZR3KkzEIgZi9sQtJADQ-A" 
@@ -56,10 +54,7 @@ async def get_average_stock_price(
 
 
     try:
-        # Fetch stock prices
         prices = await stock_client.get_stock_prices(ticker, minutes)
-
-        # Calculate average stock price
         average_price = sum(price.price for price in prices) / len(prices) if prices else 0
 
         return {
@@ -74,20 +69,12 @@ async def get_stock_correlation(
     minutes: int = Query(default=50, ge=1, le=120),
     ticker: List[str] = Query(min_length=2, max_length=2)
 ):
-    """
-    Calculate correlation between two stock prices
-    """
     if len(ticker) != 2:
         raise HTTPException(status_code=400, detail="Exactly two tickers must be provided")
-
-    try:
-      
+    try:     
         prices_tasks = [stock_client.get_stock_prices(t, minutes) for t in ticker]
-        stock_prices = await asyncio.gather(*prices_tasks)
-
-       
-        def calculate_correlation(x: List[float], y: List[float]):
-            
+        stock_prices = await asyncio.gather(*prices_tasks)      
+        def calculate_correlation(x: List[float], y: List[float]):       
             min_length = min(len(x), len(y))
             x, y = x[:min_length], y[:min_length]
 
